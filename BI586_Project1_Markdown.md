@@ -11,5 +11,8 @@ VERSION CONTROL: R- 4.0.4, dada2- 1.16.0, ggplot2- 3.3.3, ShortRead- 1.48.0, phy
 
 INTRODUCTION: 
 
+METHODS AND DATA ANALYSIS: 
+
+CONCLUSION: 
 
 
