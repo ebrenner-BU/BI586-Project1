@@ -1,14 +1,21 @@
 ---
 title: "BI586_dada2_analysis"
 author: "Elsa Brenner, Jamie Poirier, Erica Sun"
-date: "March 4, 2021"
+date: "March 9, 2021"
 output: html_document
 ---
 # this is our shared R Markdown Document =) 
 
-VERSION CONTROL: R- 4.0.4, dada2- 1.16.0, ggplot2- 3.3.3, ShortRead- 1.48.0, phyloseq- 1.34.0
+VERSION CONTROL: 
+R- 4.0.4
+dada2- 1.16.0
+ggplot2- 3.3.3
+ShortRead- 1.48.0
+phyloseq- 1.34.0
 
 INTRODUCTION: 
+
+
 
 METHODS AND DATA ANALYSIS: 
 
@@ -16,7 +23,11 @@ CONCLUSION:
 
 ---
 # Downloading .fastq files from NCBI SRA
-First, we have to download our data from [NCBI BioSample](https://www.ncbi.nlm.nih.gov/biosample?LinkName=bioproject_biosample_all&from_uid=628692). We chose 5 offshore and 5 inshore samples for our analysis. Now we can download all the sample number (starting with SRR) directly on NCB by using the "send to" feature with settings Format = "Accessions List" and Sort By = "Default order". Then save the accessions list with file name srafile.
+First, we have to download our data from [NCBI BioSample](https://www.ncbi.nlm.nih.gov/biosample?LinkName=bioproject_biosample_all&from_uid=628692). We chose 5 offshore and 5 inshore samples of *Siderastrea siderea* for our analysis. Now we can download all the sample number (starting with SRR) directly on NCBI by using the "send to" feature with settings:
+Format = "Accessions List" and
+Sort By = "Default order". 
+Then save the accessions list with file name srafile.
+
 Now we are ready to download our sequences.
 ```{css,echo=F}
 .sccCode {
@@ -35,3 +46,5 @@ $ mkdir sraout
 $ fastq-dump --split-files ./SRR* -O sraout/
 ```
 That's it! Now we have all of our sampels in .fastq format.
+
+REFERENCES: 
