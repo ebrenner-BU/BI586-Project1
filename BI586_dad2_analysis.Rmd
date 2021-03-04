@@ -4,14 +4,22 @@ author: "Elsa Brenner, Jamie Poirier, Erica Sun"
 date: "March 9, 2021"
 output: html_document
 ---
-# this is our shared R Markdown Document =) 
+this is our shared R Markdown Document =) 
 
 VERSION CONTROL: 
-R- 4.0.4
-dada2- 1.16.0
-ggplot2- 3.3.3
-ShortRead- 1.48.0
-phyloseq- 1.34.0
+R- 4.0.4  
+dada2- 1.16.0  
+ggplot2- 3.3.3  
+ShortRead- 1.46.0  
+phyloseq- 1.32.0  
+```{r}
+R.version
+packageVersion("dada2") #1.16.0
+packageVersion("ggplot2") #3.3.3
+packageVersion("ShortRead") #1.46.0
+packageVersion("phyloseq") #1.32.0
+```
+
 
 INTRODUCTION: 
 
@@ -22,7 +30,8 @@ METHODS AND DATA ANALYSIS:
 CONCLUSION: 
 
 ---
-# Downloading .fastq files from NCBI SRA
+# Getting Ready
+## Downloading .fastq files from NCBI SRA
 First, we have to download our data from [NCBI BioSample](https://www.ncbi.nlm.nih.gov/biosample?LinkName=bioproject_biosample_all&from_uid=628692). We chose 5 offshore and 5 inshore samples of *Siderastrea siderea* for our analysis. Now we can download all the sample number (starting with SRR) directly on NCBI by using the "send to" feature with settings:
 Format = "Accessions List" and
 Sort By = "Default order". 
@@ -45,6 +54,71 @@ $ mkdir sraout
 # Convert them to .fastq and store the output in the sraout director
 $ fastq-dump --split-files ./SRR* -O sraout/
 ```
-That's it! Now we have all of our sampels in .fastq format.
+That's it! Now we have all of our sampels in .fastq format and we're ready to run the dada2 pipeline!
+
+## Loading Required Packages
+First we have to install the packages. 
+```{r, eval=FALSE}
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+BiocManager::install("dada2")
+BiocManager::install('vegan')
+BiocManager::install('phyloseq')
+```
+Then load the required packages.
+```{r, eval=FALSE}
+library(dada2)
+library(ShortRead)
+library(ggplot2)
+library(phyloseq)
+```
+
+## Set the working directory
+We need to make sure that all the files we are working with are in the same directory.
+```{r}
+# Make sure to change this to the directory you're working in!
+setwd('/Users/ericasun/Documents/GitHub/BI586-Project1/')
+```
+
+# Trimming and Filtering
+Set our current working directory as path, and set all of the files in there as fns. 
+```{r}
+path <- '/Users/ericasun/Documents/GitHub/BI586-Project1/'
+fns <- list.files(path)
+```
+
+Aiign every file that ends with .fastq as fastqs and sort them.
+```{r}
+fastqs <- fns[grepl(".fastq$", fns)]
+fastqs <- sort(fastqs) 
+# Now let's take a look to ensure we're on the right track!
+fastqs
+```
+
+Get the sample names, so essentailly just everything before "_1.fastq"
+```{r}
+sample.names <- sapply(strsplit(fastqs, "_1.fastq"), `[`, 1)
+# Let's take a look
+sample.names
+```
+Assign the full path as fnFs
+```{r}
+fnFs <- file.path(path, fastqs)
+head(fnFs) #Let's just take a peak this time
+```
+
+##Visualize Raw Data
+Let's take a look at quality profile
+```{r}
+# Let's start with the first five reads, which are the offshores. 
+plotQualityProfile(fnFs[c(1,2,3,4,5)])
+# Then let's look at the inshore ones
+plotQualityProfile(fnFs[c(6,7,8,9,10)])
+```
+
+
+
+
+
 
 REFERENCES: 
