@@ -111,9 +111,9 @@ head(fnFs) #Let's just take a peak this time
 Let's take a look at quality profile
 ```{r}
 # Let's start with the first five reads, which are the offshores. 
-plotQualityProfile(fnFs[c(1,2,3,4,5)])
+dada2::plotQualityProfile(fnFs[c(1,2,3,4,5)])
 # Then let's look at the inshore ones
-plotQualityProfile(fnFs[c(6,7,8,9,10)])
+dada2::plotQualityProfile(fnFs[c(6,7,8,9,10)])
 ```
 
 
