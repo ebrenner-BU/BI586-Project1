@@ -7,11 +7,6 @@ output: html_document
 this is our shared R Markdown Document =) 
 
 VERSION CONTROL: 
-R- 4.0.4  
-dada2- 1.16.0  
-ggplot2- 3.3.3  
-ShortRead- 1.46.0  
-phyloseq- 1.32.0  
 ```{r}
 R.version
 packageVersion("dada2") #1.16.0
@@ -20,15 +15,23 @@ packageVersion("ShortRead") #1.46.0
 packageVersion("phyloseq") #1.32.0
 ```
 
+---
+# INTRODUCTION: 
 
-INTRODUCTION: 
+For this assignment, we used the data used in ["Patterns of environmental variability influence coral‐associated bacterial and algal communities on the Mesoamerican Barrier Reef"](https://onlinelibrary.wiley.com/doi/full/10.1111/mec.15497) published in *Molecular Ecology* by L. Speare, et. al. (2020).  
 
-Elsa will do this lol
+Speare et. al.'s study explores the bacterial and algal symbionts associated with two species of Caribbean stony corals-- *Siderastrea siderea* and *Siderastrea radians* found on the Belize Mesoamerican Barrier Reef (Figure 1).  Their study aimed to investigate the factors that determine variability in Bacterial Community Composition (BCC); specifically how BCC varried across two species in the same genus, and how BCC varried across location, both in different sites, and inshore v. offshore at specific sites.  
+
+For their analysis, Speare et. al. amplified a 444 bp section of the V3-V4 variable regions of the 16S gene.  The 16S gene... 
+
+In brief summary, the team found that BCC varried significantly between species, and from site-to-site.  However, their findings explained >11% of variability, and future investigation into the factors determining BCC and algal composition are necessary.  
+
+For this assignment, we looked at subsample of 10 of *Siderastrea siderea*, 5 from inshore locations and 5 from offshore locations, and accessed the genomic data from the [NCBI Sequence Read Archive (SRA)](https://www.ncbi.nlm.nih.gov/sra).    
 
 
 METHODS AND DATA ANALYSIS: 
 
-CONCLUSION: 
+CONCLUSION:
 
 ---
 # Getting Ready
@@ -116,10 +119,5 @@ dada2::plotQualityProfile(fnFs[c(1,2,3,4,5)])
 # Then let's look at the inshore ones
 dada2::plotQualityProfile(fnFs[c(6,7,8,9,10)])
 ```
-
-
-
-
-
-
-REFERENCES: 
+---
+# REFERENCES: 
