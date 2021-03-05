@@ -124,3 +124,5 @@ Coralpedia - Your guidie to caribbean corals and sponges. (2021). Retrieved Marc
 Speare, L, Davies, SW, Balmonte, JP, Baumann, J, Castillo, KD. Patterns of environmental variability influence coral‐associated bacterial and algal communities on the Mesoamerican Barrier Reef. Mol Ecol. 2020; 29: 2334– 2348. https://doi.org/10.1111/mec.15497
 
 [WoRMS Editorial Board](http://www.marinespecies.org/aphia.php?p=popup&name=citation) (2021). World Register of Marine Species. Available from http://www.marinespecies.org at VLIZ. Accessed 2021-03-05. doi:10.14284/170
+
+
