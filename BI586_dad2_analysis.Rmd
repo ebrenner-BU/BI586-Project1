@@ -2,7 +2,12 @@
 title: "BI586_dada2_analysis"
 author: "Elsa Brenner, Jamie Poirier, Erica Sun"
 date: "March 9, 2021"
-output: html_document
+output: 
+  html_document:
+    toc: TRUE
+    toc_depth: 3
+    toc_float: TRUE
+    theme: lumen
 ---
 VERSION CONTROL: 
 ```{r}
@@ -108,7 +113,7 @@ fnFs <- file.path(path, fastqs)
 head(fnFs) #Let's just take a peak this time
 ```
 
-## Visualize Raw Data
+### Visualize Raw Data
 Let's take a look at quality profile
 ```{r}
 # Let's start with the first five reads, which are the offshores. 
@@ -116,6 +121,118 @@ dada2::plotQualityProfile(fnFs[c(1,2,3,4,5)])
 # Then let's look at the inshore ones
 dada2::plotQualityProfile(fnFs[c(6,7,8,9,10)])
 ```
+According to the output, we should trim our data at 200. Let's create a directory and filenames of the trimmed fastqs. 
+```{r}
+filt_path <- file.path(path, "trimmed")
+if(!file_test("-d", filt_path)) dir.create(filt_path)
+filtFs <- file.path(filt_path, paste0(sample.names, "_filt.fastq.gz"))
+```
+
+### Filtering
+```{r}
+out <- dada2::filterAndTrim(fnFs, filtFs, truncLen= 200, #end of single end reads = approx. 300 bp
+                     maxN=0, #DADA does not allow Ns
+                     maxEE=1, #allow 1 expected errors, where EE = sum(10^(-Q/10)); more conservative, model converges
+                     truncQ=2, #standard filtering parameters
+                     trimLeft=20, #N nucleotides to remove from the start of each read: ITS2 primer = F 20bp
+                     rm.phix=TRUE, #remove reads matching phiX genome
+                     compress=TRUE, multithread=TRUE) # On Windows set multithread=FALSE
+
+head(out)
+tail(out)
+```
+## Learn Error Rates
+Every amplicon dataset has a different set of error rates, the learnError method can learn the error model from the data. The algorithm must begin with an initial guess, for which the maximum possible error rates in the data are used. For example, when the most abundant sequence is correct, and all the rest are errors.  
+Some things to keep in mind --  
+* Error rates should decline with increasing qual score
+* red line is based on definition of quality score alone
+* black line is estimated error rate after convergence
+```{r}
+#setDadaOpt(MAX_CONSIST=30) #increase number of cycles to allow convergence #Actually not sure what this is doing? Ask for help.
+errF <- dada2::learnErrors(filtFs, multithread=TRUE)
+dada2::plotErrors(errF, nominalQ=TRUE) 
+```
+
+## Dereplicate Reads
+Dereplication combines identical sequences into one "unique sequence". "Abundance" is the number of reads with that unique sequence. This is done to reduce computation time by eliminating redundant comparisons. DADA2 has a summary of the quality information associated with each unique sequence. To increase DADA2's accuracy, this quality information tells the error model of the subsequent denoising step.
+```{r}
+derepFs <- dada2::derepFastq(filtFs, verbose=TRUE)
+# Naming the dereplicated-class objects by the sample names
+names(derepFs) <- sample.names
+```
+
+## Infer Sequence Variants
+```{r}
+dadaFs <- dada2::dada(derepFs, err=errF, multithread=TRUE)
+```
+Now, let's take a look at the data class object by sample. This will tell us how many "real" variants there are in the unique input seqs.
+```{r}
+dadaFs[[1]]
+dadaFs[[10]]
+```
+The DADA2 algorithm inferred 144 true sequence variants from the 4463 unique sequences in the first sample. 
+The DADA2 algorithm inferred 80 true sequence variants from the 1785 unique sequences in the first sample. 
+Now let's construct a sequnce table.
+```{r, results='hide'}
+seqtab <- dada2::makeSequenceTable(dadaFs)
+head(seqtab)
+```
+
+## Remove Chimeras
+We have removed the substitution and idel errors, but there are still chimeras. So we're going to remove them in this step. The accuracy of the sequences after denoisying makes identifying chimeras easier. All sequences can be exactly reconstructed as a bimera (two-parent chimera) from more abundant sequences. 
+```{r}
+seqtab.nochim <- dada2::removeBimeraDenovo(seqtab, method="consensus", multithread=TRUE, verbose=TRUE)
+dim(seqtab.nochim) # dim function retrieve or set the dimension of an object
+```
+We identified 6 bimeras out of 940 input sequences. This is how much sample remain after the removal of chimera. Most reads still remain. 
+```{r}
+sum(seqtab.nochim)/sum(seqtab)
+```
+For our sample, the ration was 0.9956432 with 6 bimeras. Let's output this result as a .csv file
+```{r}
+write.csv(seqtab,file="dadaFs_seqtab.csv")
+write.csv(seqtab.nochim,file="dadaFs_nochim.csv")
+```
+
+## Track Read Stats
+```{r}
+getN <- function(x) sum(dada2::getUniques(x))
+track <- cbind(out, sapply(dadaFs, getN), sapply(dadaFs, getN), rowSums(seqtab), rowSums(seqtab.nochim))
+colnames(track) <- c("input", "filtered", "denoised", "merged", "tabled", "nonchim")
+rownames(track) <- sample.names
+head(track)
+tail(track)
+
+write.csv(track,file="ReadFilterStats_AllData_final.csv",row.names=TRUE,quote=FALSE)
+```
+
+## Assign Taxonomy
+DADA2 uses naive Bayesian classifier method to assign taxonomy. The assignTaxonomy function takes as input a set of sequences to be classified and a tranning set of reference sequence with known taxonomy. It outputs taxonomic assignments with at least minBoot bootstrap confidence.
+```{r}
+taxa <- dada2::assignTaxonomy(seqtab.nochim, "GeoSymbio_ITS2_LocalDatabase_verForPhyloseq.fasta", minBoot=70,multithread=TRUE,tryRC=TRUE,outputBootstraps=FALSE)
+#minboot should be 70
+#Obtain a csv file for the taxonomy so that it's easier to map the sequences for the heatmap.
+write.csv(taxa, file="taxa.csv",row.name=TRUE,quote=FALSE)
+unname(head(taxa, 30))
+unname(taxa)
+
+# Save outputs as .rds to save some spaces
+saveRDS(seqtab.nochim, file="final_seqtab_nochim.rds")
+saveRDS(taxa, file="final_taxa_blastCorrected.rds")
+
+# If you need to read in previously saved datafiles
+seqtab.nochim <- readRDS("final_seqtab_nochim.rds")
+taxa <- readRDS("final_taxa_blastCorrected.rds")
+head(taxa)
+```
+
+## Handoff to Phyloseq
+Pyloseq is going to give us some visualization! Import the required libraries.
+```{r}
+library(phyloseq)
+library(ggplot2)
+```
+
 ---
 # **REFERENCES:**
 
