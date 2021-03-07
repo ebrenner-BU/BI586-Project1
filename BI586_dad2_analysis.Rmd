@@ -18,7 +18,6 @@ packageVersion("ShortRead") #1.46.0
 packageVersion("phyloseq") #1.32.0
 ```
 
----
 # **INTRODUCTION:** 
 
 For this assignment, we used the data used in ["Patterns of environmental variability influence coral‐associated bacterial and algal communities on the Mesoamerican Barrier Reef"](https://onlinelibrary.wiley.com/doi/full/10.1111/mec.15497) published in *Molecular Ecology* by L. Speare, et. al. (2020).  
@@ -82,7 +81,7 @@ library(phyloseq)
 
 ### Set the working directory
 We need to make sure that all the files we are working with are in the same directory.
-```{r}
+```{r, eval=FALSE}
 # Make sure to change this to the directory you're working in!
 setwd('/Users/ericasun/Documents/GitHub/BI586-Project1/')
 ```
