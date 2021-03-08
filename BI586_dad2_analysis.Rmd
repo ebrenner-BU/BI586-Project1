@@ -83,7 +83,7 @@ library(phyloseq)
 We need to make sure that all the files we are working with are in the same directory.
 ```{r, eval=FALSE}
 # Make sure to change this to the directory you're working in!
-setwd('/Users/ericasun/Documents/GitHub/BI586-Project1/') # for Erica's local computer
+# setwd('/Users/ericasun/Documents/GitHub/BI586-Project1/') # for Erica's local computer
 setwd('/usr4/bs831/ericasun/BI586/BI586-Project1') # for Erica's SCC
 ```
 
@@ -211,9 +211,10 @@ write.csv(track,file="ReadFilterStats_AllData_final.csv",row.names=TRUE,quote=FA
 ## Assign Taxonomy
 DADA2 uses naive Bayesian classifier method to assign taxonomy. The assignTaxonomy function takes as input a set of sequences to be classified and a tranning set of reference sequence with known taxonomy. It outputs taxonomic assignments with at least minBoot bootstrap confidence.
 ```{r}
-taxa <- dada2::assignTaxonomy(seqtab.nochim, "GeoSymbio_ITS2_LocalDatabase_verForPhyloseq.fasta", minBoot=70,multithread=TRUE,tryRC=TRUE,outputBootstraps=FALSE)
+taxa <- dada2::assignTaxonomy(seqtab.nochim, "silva_nr99_v138_train_set.fa", minBoot=70,multithread=TRUE,tryRC=TRUE,outputBootstraps=FALSE)
 #minboot should be 70
 #Obtain a csv file for the taxonomy so that it's easier to map the sequences for the heatmap.
+taxa <- dada2::addSpecies(taxa,"silva_species_assignment_v138.fa")
 write.csv(taxa, file="taxa.csv",row.name=TRUE,quote=FALSE)
 unname(head(taxa, 30))
 unname(taxa)
@@ -234,7 +235,52 @@ Pyloseq is going to give us some visualization! Import the required libraries.
 library(phyloseq)
 library(ggplot2)
 ```
+#import dataframe holding sample information
+#have your samples in the same order as the seqtab file in the rows, variables as columns
+```{r}
+samdf<-read.csv("variabletable.csv")
+head(samdf)
+head(seqtab.nochim)
+head(taxa)
+rownames(samdf) <- samdf$sample
+```
 
+Construct phyloseq object (straightforward from dada2 outputs)
+```{r}
+ps <- phyloseq(otu_table(seqtab.nochim, taxa_are_rows=FALSE), 
+               sample_data(samdf), 
+               tax_table(taxa))
+ps
+```
+
+replace sequences with shorter names (correspondence table output below)
+```{r}
+ids<-taxa_names(ps)
+ids <- paste0("sq",seq(1, length(colnames(seqtab.nochim))))
+colnames(seqtab.nochim) <- ids
+```
+
+Bar-plots
+```{r}
+top90 <- names(sort(taxa_sums(ps), decreasing=TRUE))[1:90]
+ps.top90 <- transform_sample_counts(ps, function(OTU) OTU/sum(OTU))
+ps.top90 <- prune_taxa(top90, ps.top90)
+
+plot_bar(ps.top90, x="Sample", fill="Class") 
+```
+
+visusalize via counts rather than abundances:
+```{r}
+plot_bar(ps, x = "sample", fill= "Class") #+ facet_wrap("tank")
+```
+
+Obtain a csv file for the phyloseq data. Will give you the abundances for each sample and class. Useful for constructing the heatmap. Also, enables you to use ggplot, and construct more aesthetically pleasing plot.
+```{r}
+psz <- psmelt(ps.top90)
+write.csv(psz, file="Phyloseqoutputfinal.csv")
+p <- ggplot(psz, aes(x=Sample, y=Abundance, fill=Class))
+p + geom_bar(stat="identity", colour="black")
+```
 ---
 # **REFERENCES:**
 
