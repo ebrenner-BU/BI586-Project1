@@ -83,13 +83,15 @@ library(phyloseq)
 We need to make sure that all the files we are working with are in the same directory.
 ```{r, eval=FALSE}
 # Make sure to change this to the directory you're working in!
-setwd('/Users/ericasun/Documents/GitHub/BI586-Project1/')
+setwd('/Users/ericasun/Documents/GitHub/BI586-Project1/') # for Erica's local computer
+setwd('/usr4/bs831/ericasun/BI586/BI586-Project1') # for Erica's SCC
 ```
 
 ## Trimming and Filtering
 Set our current working directory as path, and set all of the files in there as fns. 
 ```{r}
-path <- '/Users/ericasun/Documents/GitHub/BI586-Project1/'
+#path <- '/Users/ericasun/Documents/GitHub/BI586-Project1/' # for Erica's local computer
+path <- '/usr4/bs831/ericasun/BI586/BI586-Project1' # for Erica's SCC
 fns <- list.files(path)
 ```
 
