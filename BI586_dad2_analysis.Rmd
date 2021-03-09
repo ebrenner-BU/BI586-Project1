@@ -31,7 +31,7 @@ For their analysis, Speare et. al. amplified a 444 bp section of the V3-V4 varia
 
 In brief summary, the team found that BCC varried significantly between species, and from site-to-site. However, their findings explained >11% of variability, and future investigation into the factors determining BCC and algal composition are necessary (Speare et. al., 2020).  
 
-For this assignment, we looked at subsample of Speare et. al.'s data, 10 *Siderastrea siderea*, 5 from inshore locations and 5 from offshore locations, and accessed the genomic data from the [NCBI Sequence Read Archive (SRA)](https://www.ncbi.nlm.nih.gov/sra).
+For this assignment, we looked at subsample of Speare et. al.'s data, 10 *Siderastrea siderea*, 5 from inshore locations and 5 from offshore locations, and accessed the genomic data from the [NCBI Sequence Read Archive (SRA)](https://www.ncbi.nlm.nih.gov/sra). 
 ---
 # **STEP-BY-STEP METHODS AND DATA ANALYSIS:** 
 
@@ -131,8 +131,9 @@ filtFs <- file.path(filt_path, paste0(sample.names, "_filt.fastq.gz"))
 ```
 
 ### Filtering
+A problem that could potentially arise is that since we only use the forward and don't have the reverse reads, we could be loosing data that are after 200 bps. In the future when reverse reads are not available, we could also run the pipeline on data without any trimming and see if there are any difference between the two.
 ```{r}
-out <- dada2::filterAndTrim(fnFs, filtFs, truncLen= 200, #end of single end reads = approx. 300 bp
+out <- dada2::filterAndTrim(fnFs, filtFs, truncLen= 200, #end of single end reads = approx. 200 bp
                      maxN=0, #DADA does not allow Ns
                      maxEE=1, #allow 1 expected errors, where EE = sum(10^(-Q/10)); more conservative, model converges
                      truncQ=2, #standard filtering parameters
